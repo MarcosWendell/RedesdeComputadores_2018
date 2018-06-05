@@ -1,0 +1,9 @@
+body {
+	background-image:url(bg.gif);
+	font-family: Comic Sans MS, Comic Sans;
+	color: yellow;
+}
+
+p {
+	font-size: 20px;
+}
