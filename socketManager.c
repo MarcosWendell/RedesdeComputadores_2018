@@ -1,14 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-
-#define PORT 8081;
-#define CAPACITY 5; // capacidade da pilha de conexões pendentes;
+#include "socketManager.h"
 
 // Cria um descritor de aquivo para o socket que será utilizado;
 int createSocketFD(){
