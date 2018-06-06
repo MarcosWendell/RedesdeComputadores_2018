@@ -7,19 +7,22 @@ int createSocketFD(){
 			- type: tipo de comunicação (TCP ou UDP); -> usaremos o SOCK_STREAM que define o protocolo TCP;
 			- protocol: valor do IP(Internet Protocol); -> usaremos o default 0; 
 	*/
-	int sockfd = server(AF_INET, SOCK_STREAM, 0);
+	int sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
-	if(server_fd)
+	if(sockfd<0){
 		printf("It wasn't possible to create the socket.\n");
-	else
-		printf("Socket created.");
+		return -1;
+	}
+	else{
+		printf("Socket created.\n");
+	}
 
 	return sockfd;
 }
 
 // Abilita um conjunto de operações para o socket criado; 
 void setSockOpt(int sockfd){
-	opt = 1;
+	int opt = 1;
 
 	/* Parametros: setsockopt(int socket file descriptor, int level, int optname, int* optval, int optlen)
 			- socket file descriptor; -> usaremos o socket criado;
@@ -41,17 +44,20 @@ void socketBind(int sockfd, struct sockaddr_in addr){
 	// Atribuindo os valores necessários para estrutura do sockaddr_in;
 	addr.sin_family = AF_INET; // define o domínio
 	addr.sin_addr.s_addr = INADDR_ANY; // define o IP Adress;
-	addr.sin_port = hton(PORT); // define a porta que será utilizada;
+	addr.sin_port = htons(PORT); // define a porta que será utilizada;
 
 	/* Parametros: bind(int socket file descriptor, const struct sockaddr *addr, socklen_t addrlen)
 			- socket file descriptor; -> usaremos o socket criado;
 			- *addr: estrutura que define os parâmetros para o binding; -> usamos a estrutura que foi inicializada acima, com os parâmetros necessários já setados; 
 			- addrlen: tamanho da estrutura;
 	*/
-	if(bind(sockfd, (struct sockaddr *) &addr, (socklen_t*) &addrlen))
+	if(bind(sockfd, (struct sockaddr *) &addr, /*(socklen_t*) &*/addrlen)<0){
 		printf("It wasn't possible to bind the socket with port %d.\n", PORT);
-	else
+		
+	}
+	else{
 		printf("Socket succecfully binded.\n");
+	}
 }
 
 // Vincula o client socket à porta do servidor;
@@ -60,21 +66,24 @@ void socketConnection(int sockfd, struct sockaddr_in addr){
 
 	// Atribuindo os valores necessários para estrutura do sockaddr_in;
 	addr.sin_family = AF_INET; // define o domínio
-	addr.sin_port = hton(PORT); // define a porta que será utilizada;
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons(PORT); // define a porta que será utilizada;
 
 	/* Parametros: connect(int socket file descriptor, const struct sockaddr *addr, socklen_t addrlen)
 			- socket file descriptor; -> usaremos o socket criado;
 			- *addr: estrutura que define os parâmetros para o connect; -> usamos a estrutura que foi inicializada acima, com os parâmetros necessários já setados; 
 			- addrlen: tamanho da estrutura;
 	*/
-	if(connect(sockfd, (struct sockaddr *) &addr, (socklen_t*) &addrlen))
+	
+	/*if(connect(sockfd, (struct sockaddr *) &addr, (socklen_t*) & addrlen))
 		printf("It wasn't possible to connect the socket with port %d.\n", PORT);
 	else
 		printf("Socket succecfully connected.\n");
+	*/
 }
 
 // Escuta o canal;
-void listen(int sockfd){
+void listenSocket(int sockfd){
 	if(listen(sockfd, CAPACITY))
 		printf("The socket couldn't listen to the channel.\n");
 	else
@@ -87,7 +96,7 @@ int acceptConnection(int sockfd, struct sockaddr_in addr){
 
 	int new_socket = accept(sockfd, (struct sockaddr *) &addr, (socklen_t*)&addrlen);
 
-	if(new_socket)
+	if(!new_socket)
 		printf("It wasn't possible to accept the connection.\n");
 	else
 		printf("Connection accepted.\n");
@@ -97,17 +106,25 @@ int acceptConnection(int sockfd, struct sockaddr_in addr){
 
 // Converte endereços de string para binário;
 int convertIPvAddr(int sockfd, struct sockaddr_in addr, char* ipvAddr){
-	int bin_addr;
+	int bin_addr = inet_pton(AF_INET, "127.0.0.1", &bin_addr);
 
-	if(inet_pton(AF_INET, "127.0.0.1", &bin_addr))
-		printf("\n");
-	else
-		printf("\n");
+	if(bin_addr<=0)
+		 printf("\nInvalid address/ Address not supported \n");
+        return -1;
+	
 
 	return bin_addr;
 } 
 
 // Encerra a conexão do socket;
 void closeSocket(int sockfd){
+	
+#ifdef LINUX
+	close(sockfd);
+#elif defined WIN32
 	closesocket(sockfd);
+#else
+//#error Plataforma não suportada
+#endif
+
 }

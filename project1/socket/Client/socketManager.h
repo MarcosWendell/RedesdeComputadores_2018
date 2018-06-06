@@ -1,3 +1,6 @@
+#ifndef SOCKETMANAGER_H
+#define SOCKETMANAGER_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,8 +10,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#define PORT 8081;
-#define CAPACITY 5; // capacidade da pilha de conexões pendentes;
+#define PORT 8080
+#define CAPACITY 3 // capacidade da pilha de conexões pendentes;
 
 // Cria um descritor de aquivo para o socket que será utilizado;
 int createSocketFD();
@@ -23,7 +26,7 @@ void socketBind(int, struct sockaddr_in);
 void socketConnection(int, struct sockaddr_in);
 
 // Escuta o canal;
-void listen(int);
+void listenSocket(int);
 
 // Aceita uma conexão com o cliente;
 int acceptConnection(int, struct sockaddr_in);
@@ -33,3 +36,4 @@ int convertIPvAddr(int, struct sockaddr_in, char*);
 
 // Encerra a conexão do socket;
 void closeSocket(int);
+#endif
