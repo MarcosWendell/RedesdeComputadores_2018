@@ -64,11 +64,11 @@ void startingConnection(int* player1,int *player2 ){
      server_fd = createSocketFD();
       
     // Forcefully attaching socket to the port 8080
-   setSockOpt(server_fd);
+  setSockOpt(server_fd);
 
-    
-   socketBind(server_fd, address);
-   socketConnection(server_fd, address);
+  socketConnection(server_fd, address); 
+  socketBind(server_fd, address);
+  
 
 
    listenSocket(server_fd);

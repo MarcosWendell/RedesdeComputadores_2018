@@ -10,8 +10,8 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-#define PORT 8081
-#define CAPACITY 5 // capacidade da pilha de conexões pendentes;
+#define PORT 8080
+#define CAPACITY 3 // capacidade da pilha de conexões pendentes;
 
 // Cria um descritor de aquivo para o socket que será utilizado;
 int createSocketFD();
