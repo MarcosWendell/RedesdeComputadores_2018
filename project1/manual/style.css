@@ -7,3 +7,56 @@ body {
 p {
 	font-size: 20px;
 }
+
+table, th, td {
+    border: 1px solid red;
+}
+
+.bg-green {
+	background-color: green;
+}
+
+.rock {
+	background-color: black;
+	color: white;
+}
+
+.paper {
+	background-color: white;
+	color: black;
+}
+
+.scissors {
+	background-color: lightgreen;
+	color: gray;
+}
+
+.lizard {
+	background-color: green;
+	color: red;
+}
+
+.spock {
+	background-color: lightblue;
+	color: black;
+}
+
+.spider {
+	background-color: red;
+	color: blue;
+}
+
+.batman {
+	background-color: yellow;
+	color: black;
+}
+
+.wizard {
+	background-color: lightblue;
+	color: blue;
+}
+
+.glock {
+	background-color: gray;
+	color: purple;
+}
