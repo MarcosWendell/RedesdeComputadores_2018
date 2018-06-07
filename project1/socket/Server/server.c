@@ -11,8 +11,6 @@
 #define WINNER_PLAYER2 -2
 #define DRAW -3
 
-//struct sockaddr_in address;
-
 
 int PERDE[9][9] = { {FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //ROCK
                     {FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE}, //PAPER
@@ -53,8 +51,10 @@ char *weapon3 =
 char *weapon4 =
     "8. Wizard\n"
     "9. Glok\n";
-
-
+char *playagain =
+    "Play Again?\n"
+    "Y\n"
+    "N\n";
 
 int find_winner(char *choice1, char* choice2){
 
@@ -111,39 +111,80 @@ void read_message(int fd, char **buffer){
 
 int main(int argc, char const *argv[])
 {
-    int player1, player2; 
-    char *buffer;
+    int player1, player2; // clientes
+    char *buffer; 
     char *choice1, *choice2;
     int winner;
-    //struct sockaddr_in address;
-    //int addrlen = sizeof(address);
+    //conectando servidor com seu clientes
+    //Precisa ter 2 clientes senao fica em estado de espera
     startingConnection(&player1,&player2);
  
-    
+    /* 
+    Os 2 clientes enviam a seguinte mensagem para o servidor mostrando que estao conectador
+    Connecting Player...
+    Player Connected
+    Obs: nao funciona se o servidor nao receber alguma mensagem de confirmacao
+    */
     read_message(player1,&buffer);
     buffer = NULL;
     read_message(player2,&buffer);
     buffer = NULL;
+
+    /*
+    Server envia mensagem "Xº Player Connected\n" sendo X o valor 1 ou 2 dependendo da ordem de conexao
+    Isso ajuda os clientes a se identificarem no client.c
+    */
     send(player1 , hello1 , strlen(hello1) , 0 );
     send(player2 , hello2 , strlen(hello2) , 0 );
-   // while(1){
+    
+    //while(1){
+
+        /*
+        Mensagem enviada para os dois clientes 
+        ================== ROCK PAPER SCISSORS ==================
+                                NEW GAME!
+        */
         send_message_all(player1, player2,headline);
         send_message_all(player1, player2,newgame);
+        
+        /*
+        Apenas o player 1 escolhe o nivel do jogo
+        Para o player 1 aparece:
+                        Select level:
+                1) Easy (3 elements)
+                2) Medium (5 elements) => Not working
+                3) Hard (7 elements) => Not working
+                4) Advanced (9 elements) => Not working
+        Para o player 2 aparece:
+            Wait Player 1 Select Level...
+        */
         send_message(player1 , chooseslevel);
         send_message(player2 , waitplayer);
+        //recebe a escolha feita pelo player1
         read_message(player1, &buffer);
 
-        //read( player2 , &choice2, sizeof(buffer));
-        
-        if(buffer[0] != '1'){ printf("Invalid Answer\n");}
+      
+        //como so tem o ROCK PAPER SCISSORS basicao tem esse erro
+        if(buffer[0] != '1'){ 
+            printf("Invalid Answer\n");
+            return -1;
+        }
        
-        //printf("%s\n",buffer );
+        /*
+        Mensagem enviada para os dois clientes 
+                    Enter your weapon:
+            1. Rock
+            2. Paper
+            3. Scissors
+
+        */
         send_message_all(player1,player2,weapon);
        
+        //recebe as escolhas dos players
         read_message(player1,&choice1);
         read_message(player2,&choice2);
        
-
+        //determina vencedor
         winner = find_winner(choice1,choice2);
         if(winner == WINNER_PLAYER1){
             send_message(player1 , won);
@@ -155,6 +196,22 @@ int main(int argc, char const *argv[])
             send_message_all(player1,player2,draw);
         }
     
+       /* TENTANTIVA DE CRIAR LOOP FRACASSADA NO MOMENTO (IGNORE)
+        send_message_all(player1,player2,playagain);
+        read_message(player1,&choice1);
+        read_message(player2,&choice2);
+        if(choice1[0]=='N' || choice2[0]=='N') break;       
+
+     }   */
+
+
+    //finalizando jogabilidade
+        if(buffer) free(buffer);
+        if(choice1) free(choice1);
+        if(choice2) free(choice2);
+
+    shutdown(player1,2);
+    shutdown(player2,2);
 
     return 0;
 }

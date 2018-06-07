@@ -1,0 +1,7 @@
+Dicas de Compilacao
+
+- Abra 3 terminais
+	-> 2 no diretorio RedesdeComputadores_2018/project1/socket/Client
+	-> 1 no diretorio RedesdeComputadores_2018/project1/socket/Server
+- Chame o make e make run
+- Veja a magica acontecer! <3	
