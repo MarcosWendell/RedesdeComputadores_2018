@@ -16,7 +16,7 @@ typedef enum{
       TRUE}
 bool;
 
-char *weaponsNames[9] ={"Rock","Paper","Scissors","Lizard","Spok","Spider-Man","Batman","Wizard","Glock"};
+char *weaponsNames[9] ={"Rock","Paper","Scissors","Lizard","Spock","Spider-Man","Batman","Wizard","Glock"};
 
 int PERDE3[3][3] = {{FALSE, TRUE, FALSE},
                     {FALSE, FALSE, TRUE},
@@ -26,11 +26,11 @@ int PERDE9[9][9] = { {FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}
                     {FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE}, //PAPER
                     {TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //SCISSORS
                     {FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE}, //LIZARD
-                    {FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE}, //SPOK
+                    {FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE}, //SPOCK
                     {TRUE, FALSE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE}, //SPIDER-MAN
                     {TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE}, //BATMAN
                     {TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE}, //WIZARD
-                    {FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE}}; //GLOK
+                    {FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE}}; //GLOCK
 
 //Mensagens do servidor
 char *headline = "================== ROCK PAPER SCISSORS ==================\n" ;
@@ -56,11 +56,11 @@ char *weapon2 =
     "2. Paper\n"
     "3. Scissors\n"
     "4. Lizard\n"
-    "5. Spok\n"
+    "5. Spock\n"
     "6. Spider-man\n"
     "7. Batman\n"
     "8. Wizard\n"
-    "9. Glok\n";
+    "9. Glock\n";
 char *playagain =
     "\nPlay Again?\n"
     "Y\n"
