@@ -1,7 +1,7 @@
 all: clean socketManager.o client.o  compile clean
 
 compile:	
-	gcc socketManager.o client.o -o client -lm 
+	gcc socketManager.o client.o -o client.exe -lm 
 socketManager.o:
 	gcc -c socketManager.c 
 client.o:
@@ -9,7 +9,8 @@ client.o:
 clean:
 	find -name '*~' | xargs rm -rf {}
 	find -name '*.o' | xargs rm -rf {}
+	find -name '*.exe' | xargs rm -rf {}
 run:
-	./client
+	./client.exe
 zip:
 	zip -r client *.c *.h Makefile
