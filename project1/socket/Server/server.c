@@ -38,9 +38,7 @@ char *newgame = "\t\t\tNEW GAME!\n" ;
 char *chooseslevel =
     "Select level:\n"
     "1) Easy (3 elements)\n"
-    "2) Medium (5 elements) => Not working\n"
-    "3) Hard (7 elements) => Not working\n"
-    "4) Advanced (9 elements) => Not working\n";
+    "2) Advanced (9 elements)\n";
 char *waitplayer = "Wait Player 1 Select Level..." ;
 char *hello1 = "1º Player Connected\n";
 char *hello2 = "2º Player Connected\n";
@@ -58,21 +56,11 @@ char *weapon2 =
     "2. Paper\n"
     "3. Scissors\n"
     "4. Lizard\n"
-    "5. Spok\n";
-char *weapon3 =
-    "Enter your weapon:\n"
-    "1. Rock\n"
-    "2. Paper\n"
-    "3. Scissors\n"
-    "4. Lizard\n"
     "5. Spok\n"
     "6. Spider-man\n"
     "7. Batman\n"
     "8. Wizard\n"
     "9. Glok\n";
-//char *weapon4 =
-//  "8. Wizard\n"
-//  "9. Glok\n";
 char *playagain =
     "\nPlay Again?\n"
     "Y\n"
@@ -92,10 +80,8 @@ int find_winner(char *choice1, char* choice2, int difficulty){
         if(PERDE3[player1][player2]) return WINNER_PLAYER2;
       break;
       case 2:
-//        if(PERDE5[player1][player2]) return WINNER_PLAYER2;
-      break;
-      case 3:
         if(PERDE9[player1][player2]) return WINNER_PLAYER2;
+      break;
     }
     return WINNER_PLAYER1;
 }
@@ -144,9 +130,7 @@ void read_message(int fd, char **buffer){
 bool valid_answer(char *choice, int difficulty){
     if(!strcmp(choice,"1") || !strcmp(choice,"2") || !strcmp(choice,"3")){
       return TRUE;
-    }else if(difficulty > 1 && (!strcmp(choice,"4") || !strcmp(choice,"5"))){
-      return TRUE;
-    }else if(difficulty > 2 && (!strcmp(choice,"6") || !strcmp(choice,"7") || !strcmp(choice, "8") || !strcmp(choice, "9"))){
+    }else if(difficulty > 1 && (!strcmp(choice,"4") || !strcmp(choice,"5") || !strcmp(choice,"6") || !strcmp(choice,"7") || !strcmp(choice, "8") || !strcmp(choice, "9"))){
       return TRUE;
     }else{
       return FALSE;
@@ -221,13 +205,9 @@ int main(int argc, char const *argv[])
               difficulty = 1;
               weapons = weapon;
               send_message(player1, weapons);
-/*            }else if(!strcmp(buffer,"2")){
+            }else if(!strcmp(buffer,"2")){
               difficulty = 2;
               weapons = weapon2;
-              send_message(player1, weapons);
-*/            }else if(!strcmp(buffer,"3")){
-              difficulty = 3;
-              weapons = weapon3;
               send_message(player1, weapons);
             }else{
               printf("Invalid Answer");
@@ -306,7 +286,6 @@ while(TRUE){
        break;
      }else{
        send_message_all(player1,player2,weapons);
-//       break;
      }
 }
 
