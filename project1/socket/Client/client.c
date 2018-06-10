@@ -9,10 +9,13 @@ char* buffer;
 
 
 void read_message(int fd){
+    int aux;
     buffer = (char*)malloc(sizeof(char)*256);
+    read( fd, &aux, sizeof(int));
+//    printf("%d",aux);
     //Recebebendo mensagem do servidor
 //    printf("--open\n");
-    read( fd , buffer, 256);
+    read( fd , buffer, aux);
 //    printf("--close\n");
     printf("%s\n",buffer );
 
@@ -61,12 +64,14 @@ int main(int argc, char const *argv[])
     */
     read_message(server_fd);
 
-
     //Identifica-se qual player que eh pela mensagem recebida que eh "Xº Player Connected\n" onde X sera o identifier
     if(buffer[0] == '1') iamplayer = 1;
     else if (buffer[0] == '2') iamplayer = 2;
     else return -1;
 
+    read_message(server_fd);
+    read_message(server_fd);
+    read_message(server_fd);
         if(iamplayer==1){ //caso seja o primeiro a conectar escolhe a dificuldade do jogo
             do{
               printf("Answer:");
@@ -77,6 +82,8 @@ int main(int argc, char const *argv[])
         }else{
           read_message(server_fd);
         }
+
+
         /*
         Mensagem recebida por player 2:
             Wait Player 1 Select Level...
@@ -91,28 +98,28 @@ int main(int argc, char const *argv[])
       while(1){
         do{
             scanf("%s",resposta);
-            printf("Awating Response\n");
+            printf("Awating Response...\n");
             send(server_fd, resposta, strlen(resposta) , 0 );
             read_message(server_fd);
         }while(!strcmp(buffer, "Invalid Answer"));
-//        read_message(server_fd);
+        read_message(server_fd);
         //cliente recebe a mensagem se ganhou, perdeu ou deu empate
-//            read_message(server_fd);
-            buffer = NULL;
+        read_message(server_fd);
+        read_message(server_fd);
+        buffer = NULL;
+
         do{
         //pergunta-se se o cliente que jogar de novo
             scanf("%s",resposta);
-            printf("Awating Response\n");
+            printf("Awating Response...\n");
             send(server_fd, resposta, strlen(resposta) , 0 );
             read_message(server_fd);
            // if(resposta[0] = 'N') break;
          }while(!strcmp(buffer,"Invalid Answer"));
 
-         if(!strcmp(buffer, "N")){
-           printf("Game Over\n");
+         if(!strcmp(buffer, "Game Over")){
            break;
          }
-
       }
 
         if(buffer) free(buffer);

@@ -5,8 +5,6 @@
 #include <netinet/in.h>
 #include <string.h>
 #include "socketManager.h"
-//#define TRUE 1
-//#define FALSE 0
 #define WINNER_PLAYER1 -1
 #define WINNER_PLAYER2 -2
 #define DRAW -3
@@ -18,11 +16,7 @@ bool;
 
 char *weaponsNames[9] ={"Rock","Paper","Scissors","Lizard","Spok","Spider-Man","Batman","Wizard","Glock"};
 
-int PERDE3[3][3] = {{FALSE, TRUE, FALSE},
-                    {FALSE, FALSE, TRUE},
-                    {TRUE, FALSE, FALSE}};
-
-int PERDE9[9][9] = { {FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //ROCK
+int PERDE[9][9] = { {FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //ROCK
                     {FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE}, //PAPER
                     {TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //SCISSORS
                     {FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE}, //LIZARD
@@ -63,26 +57,20 @@ char *weapon2 =
     "9. Glok\n";
 char *playagain =
     "\nPlay Again?\n"
+    "(Both Players have to agree)\n"
     "Y\n"
     "N\n";
-char *valid = "Valid Answer";
+char *gameOver = "Game Over";
 char *invalid = "Invalid Answer";
 
-int find_winner(char *choice1, char* choice2, int difficulty){
+int find_winner(char *choice1, char* choice2){
 
     int player1, player2;
     player1 = choice1[0] - '0';
     player2 = choice2[0] - '0';
     printf("player1: %d\n", player1);
     if (player1 == player2) return DRAW;
-    switch(difficulty){
-      case 1:
-        if(PERDE3[player1][player2]) return WINNER_PLAYER2;
-      break;
-      case 2:
-        if(PERDE9[player1][player2]) return WINNER_PLAYER2;
-      break;
-    }
+    if(PERDE[player1][player2]) return WINNER_PLAYER2;
     return WINNER_PLAYER1;
 }
 
@@ -109,12 +97,16 @@ void startingConnection(int* player1,int *player2 ){
     (*player2) = p2;
 
 }
-void send_message_all(int player1, int player2 ,char *s){
-    send(player1 , s , strlen(s) , 0 );
-    send(player2 , s , strlen(s) , 0 );
-}
+
 void send_message(int player, char *s){
+    int aux = strlen(s);
+    send(player, &aux, sizeof(int), 0 );
     send(player , s , strlen(s) , 0 );
+}
+
+void send_message_all(int player1, int player2 ,char *s){
+    send_message(player1 , s);
+    send_message(player2 , s);
 }
 
 void read_message(int fd, char **buffer){
@@ -168,8 +160,8 @@ int main(int argc, char const *argv[])
     Server envia mensagem "Xº Player Connected\n" sendo X o valor 1 ou 2 dependendo da ordem de conexao
     Isso ajuda os clientes a se identificarem no client.c
     */
-    send(player1 , hello1 , strlen(hello1) , 0 );
-    send(player2 , hello2 , strlen(hello2) , 0 );
+    send_message(player1 , hello1);
+    send_message(player2 , hello2);
 
     //while(1){
 
@@ -204,11 +196,9 @@ int main(int argc, char const *argv[])
             if(!strcmp(buffer,"1")){
               difficulty = 1;
               weapons = weapon;
-              send_message(player1, weapons);
             }else if(!strcmp(buffer,"2")){
               difficulty = 2;
               weapons = weapon2;
-              send_message(player1, weapons);
             }else{
               printf("Invalid Answer");
               send_message(player1, invalid);
@@ -216,6 +206,7 @@ int main(int argc, char const *argv[])
               buffer = NULL;
             }
       }
+      send_message_all(player1,player2,weapons);
         /*
         Mensagem enviada para os dois clientes
                     Enter your weapon:
@@ -224,7 +215,6 @@ int main(int argc, char const *argv[])
             3. Scissors
 
         */
-        send_message(player2,weapons);
 while(TRUE){
 
         //recebe as escolhas dos players
@@ -244,7 +234,7 @@ while(TRUE){
           }
         }
         //determina vencedor
-        winner = find_winner(choice1,choice2, difficulty);
+        winner = find_winner(choice1,choice2);
         if(winner == WINNER_PLAYER1){
             send_message(player1 , won);
             send_message(player2 , lost);
@@ -275,14 +265,14 @@ while(TRUE){
          free(choice1);
          choice1 = NULL;
        }
-       if(strcmp(choice1, "Y") && strcmp(choice1, "N")){
+       if(strcmp(choice2, "Y") && strcmp(choice2, "N")){
          send_message(player2,invalid);
          free(choice2);
          choice2 = NULL;
        }
      }
      if(!strcmp(choice1,"N") || !strcmp(choice2,"N")){
-       send_message_all(player1,player2,"N");
+       send_message_all(player1,player2,gameOver);
        break;
      }else{
        send_message_all(player1,player2,weapons);
