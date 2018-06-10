@@ -94,6 +94,11 @@ void listenSocket(int sockfd){
 int acceptConnection(int sockfd, struct sockaddr_in addr){
 	int addrlen = sizeof(addr);
 
+	/* Parametros: accept(int socket file descriptor, const struct sockaddr *addr, socklen_t addrlen)
+			- socket file descriptor; -> usaremos o socket criado;
+			- *addr: estrutura com os parâmetros da conexao; -> usamos a estrutura que foi passada como argumento com os parâmetros necessários já setados; 
+			- addrlen: tamanho da estrutura;
+	*/
 	int new_socket = accept(sockfd, (struct sockaddr *) &addr, (socklen_t*)&addrlen);
 
 	if(!new_socket)
@@ -106,6 +111,11 @@ int acceptConnection(int sockfd, struct sockaddr_in addr){
 
 // Converte endereços de string para binário;
 int convertIPvAddr(int sockfd, struct sockaddr_in addr, char* ipvAddr){
+	/* Parametros: inet_pton(int domain, const char src, void dst)
+			- socket file descriptor; -> usaremos o AF_INET que define o IPv4;
+			- scr: string com o endereço IPvX; -> usamos o endereco padrao; 
+			- dst: estrutura que irá receber o endereço convertido para binario;
+	*/
 	int bin_addr = inet_pton(AF_INET, "127.0.0.1", &bin_addr);
 
 	if(bin_addr<=0)
