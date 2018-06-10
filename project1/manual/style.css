@@ -18,6 +18,20 @@ table, th, td {
 	background-color: green;
 }
 
+.bg-purple {
+	background-color: purple;
+}
+
+.dot3 {
+	background-color: white;
+	color: red;
+}
+
+.dot4{
+	background-color: firebrick;
+	color: orange;
+}
+
 .rock {
 	background-color: black;
 	color: white;
@@ -61,4 +75,14 @@ table, th, td {
 .glock {
 	background-color: gray;
 	color: purple;
+}
+
+.ganha {
+	background-color: gold;
+	color: black;
+}
+
+.perde {
+	background-color: gray;
+	color: black;
 }
