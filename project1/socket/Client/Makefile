@@ -1,4 +1,4 @@
-all: clean socketManager.o client.o  compile clean
+all: clean socketManager.o client.o  compile
 
 compile:	
 	gcc socketManager.o client.o -o client.exe -lm 
