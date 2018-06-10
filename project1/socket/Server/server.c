@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
-#include "../socketManager.h"
+#include "socketManager.h"
+//#define TRUE 1
+//#define FALSE 0
 #define WINNER_PLAYER1 -1
 #define WINNER_PLAYER2 -2
 #define DRAW -3
@@ -16,7 +18,11 @@ bool;
 
 char *weaponsNames[9] ={"Rock","Paper","Scissors","Lizard","Spock","Spider-Man","Batman","Wizard","Glock"};
 
-int PERDE[9][9] = { {FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //ROCK
+int PERDE3[3][3] = {{FALSE, TRUE, FALSE},
+                    {FALSE, FALSE, TRUE},
+                    {TRUE, FALSE, FALSE}};
+
+int PERDE9[9][9] = { {FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //ROCK
                     {FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, FALSE}, //PAPER
                     {TRUE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE}, //SCISSORS
                     {FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE}, //LIZARD
@@ -57,26 +63,33 @@ char *weapon2 =
     "9. Glock\n";
 char *playagain =
     "\nPlay Again?\n"
-    "(Both Players have to agree)\n"
     "Y\n"
     "N\n";
-char *gameOver = "Game Over";
+char *valid = "Valid Answer";
 char *invalid = "Invalid Answer";
 
-int find_winner(char *choice1, char* choice2){
+int find_winner(char *choice1, char* choice2, int difficulty){
 
     int player1, player2;
     player1 = choice1[0] - '0';
     player2 = choice2[0] - '0';
     printf("player1: %d\n", player1);
     if (player1 == player2) return DRAW;
-    if(PERDE[player1][player2]) return WINNER_PLAYER2;
+    switch(difficulty){
+      case 1:
+        if(PERDE3[player1][player2]) return WINNER_PLAYER2;
+      break;
+      case 2:
+        if(PERDE9[player1][player2]) return WINNER_PLAYER2;
+      break;
+    }
     return WINNER_PLAYER1;
 }
 
 void startingConnection(int* player1,int *player2 ){
   int server_fd;
   struct sockaddr_in address;
+ // int addrlen = sizeof(address);
 
      server_fd = createSocketFD();
 
@@ -96,29 +109,21 @@ void startingConnection(int* player1,int *player2 ){
     (*player2) = p2;
 
 }
-
-void send_message(int player, char *s){
-    int messageLenght = strlen(s)+1;
-    send(player, &messageLenght, sizeof(int), 0 );
-    send(player , s , messageLenght , 0 );
-}
-
 void send_message_all(int player1, int player2 ,char *s){
-    send_message(player1 , s);
-    send_message(player2 , s);
+    send(player1 , s , strlen(s) , 0 );
+    send(player2 , s , strlen(s) , 0 );
+}
+void send_message(int player, char *s){
+    send(player , s , strlen(s) , 0 );
 }
 
 void read_message(int fd, char **buffer){
-    if(*buffer != NULL){
-      free(*buffer);
-      *buffer = NULL;
-    }
-    int messageLenght;
-    read(fd, &messageLenght, sizeof(int));
-    (*buffer) = (char*)malloc(sizeof(char)*messageLenght);
+    (*buffer) = (char*)malloc(sizeof(char)*50);
     //Recebebendo mensagem do servidor
-    read( fd , (*buffer), messageLenght);
-    printf("Received Message: %s\n",(*buffer) );
+//    printf("--open\n");
+    read( fd , (*buffer), 256);
+//    printf("--close\n");
+    printf("%s\n",(*buffer) );
 
 }
 
@@ -153,14 +158,18 @@ int main(int argc, char const *argv[])
     Obs: nao funciona se o servidor nao receber alguma mensagem de confirmacao
     */
     read_message(player1,&buffer);
+    free(buffer);
+    buffer = NULL;
     read_message(player2,&buffer);
+    free(buffer);
+    buffer = NULL;
 
     /*
     Server envia mensagem "Xº Player Connected\n" sendo X o valor 1 ou 2 dependendo da ordem de conexao
     Isso ajuda os clientes a se identificarem no client.c
     */
-    send_message(player1 , hello1);
-    send_message(player2 , hello2);
+    send(player1 , hello1 , strlen(hello1) , 0 );
+    send(player2 , hello2 , strlen(hello2) , 0 );
 
     //while(1){
 
@@ -195,15 +204,18 @@ int main(int argc, char const *argv[])
             if(!strcmp(buffer,"1")){
               difficulty = 1;
               weapons = weapon;
+              send_message(player1, weapons);
             }else if(!strcmp(buffer,"2")){
               difficulty = 2;
               weapons = weapon2;
+              send_message(player1, weapons);
             }else{
               printf("Invalid Answer");
               send_message(player1, invalid);
+              free(buffer);
+              buffer = NULL;
             }
       }
-      send_message_all(player1,player2,weapons);
         /*
         Mensagem enviada para os dois clientes
                     Enter your weapon:
@@ -212,6 +224,7 @@ int main(int argc, char const *argv[])
             3. Scissors
 
         */
+        send_message(player2,weapons);
 while(TRUE){
 
         //recebe as escolhas dos players
@@ -231,7 +244,7 @@ while(TRUE){
           }
         }
         //determina vencedor
-        winner = find_winner(choice1,choice2);
+        winner = find_winner(choice1,choice2, difficulty);
         if(winner == WINNER_PLAYER1){
             send_message(player1 , won);
             send_message(player2 , lost);
@@ -253,8 +266,6 @@ while(TRUE){
         if(choice1[0]=='N' || choice2[0]=='N') break;
 
      }   */
-     free(choice1);
-     free(choice2);
      choice1 = choice2 = NULL;
      while(choice1 == NULL || choice2 == NULL){
        if(choice1 == NULL)read_message(player1,&choice1);
@@ -264,19 +275,17 @@ while(TRUE){
          free(choice1);
          choice1 = NULL;
        }
-       if(strcmp(choice2, "Y") && strcmp(choice2, "N")){
+       if(strcmp(choice1, "Y") && strcmp(choice1, "N")){
          send_message(player2,invalid);
          free(choice2);
          choice2 = NULL;
        }
      }
      if(!strcmp(choice1,"N") || !strcmp(choice2,"N")){
-       send_message_all(player1,player2,gameOver);
+       send_message_all(player1,player2,"N");
        break;
      }else{
        send_message_all(player1,player2,weapons);
-       free(choice1);
-       free(choice2);
      }
 }
 
@@ -285,8 +294,8 @@ while(TRUE){
         if(choice1) free(choice1);
         if(choice2) free(choice2);
 
-    closeSocket(player1);
-    closeSocket(player2);
+    shutdown(player1,2);
+    shutdown(player2,2);
 
     return 0;
 }
