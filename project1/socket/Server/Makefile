@@ -5,7 +5,7 @@ compile:
 server.o:
 	gcc -c server.c 
 socketManager.o:
-	gcc -c socketManager.c 
+	gcc -c ../socketManager.c 
 clean:
 	find -name '*~' | xargs rm -rf {}
 	find -name '*.o' | xargs rm -rf {}
