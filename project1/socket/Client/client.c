@@ -3,25 +3,31 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
-#include "socketManager.h"
+#include "../socketManager.h"
 
-char* buffer;
+char* buffer = NULL;
 
 
 void read_message(int fd){
-    int aux;
-    buffer = (char*)malloc(sizeof(char)*256);
-    read( fd, &aux, sizeof(int));
-//    printf("%d",aux);
+    if(buffer != NULL){
+      buffer = NULL;
+      free(buffer);
+    }
+    int messageLenght;
+    read( fd, &messageLenght, sizeof(int));
+    buffer = (char*)malloc(sizeof(char)*messageLenght);
     //Recebebendo mensagem do servidor
-//    printf("--open\n");
-    read( fd , buffer, aux);
-//    printf("--close\n");
+    read( fd , buffer, messageLenght);
     printf("%s\n",buffer );
 
 
 }
 
+void send_message(int server_fd, char *s){
+    int messageLenght = strlen(s)+1;
+    send(server_fd, &messageLenght, sizeof(int), 0);
+    send(server_fd, s , messageLenght , 0);
+}
 
 int main(int argc, char const *argv[])
 {
@@ -56,7 +62,7 @@ int main(int argc, char const *argv[])
     //A conexao ja esta estabelecida e agora comeca a logica do jogo
 
 
-    send(server_fd, connecting , strlen(connecting) , 0 );
+    send_message(server_fd, connecting);
 
     /*
     Mensagem recebida do servidor:
@@ -76,7 +82,7 @@ int main(int argc, char const *argv[])
             do{
               printf("Answer:");
               scanf("%s",resposta);
-              send(server_fd, resposta, strlen(resposta) , 0 );
+              send_message(server_fd, resposta);
               read_message(server_fd);
             }while(!strcmp(buffer, "Invalid Answer"));
         }else{
@@ -93,28 +99,25 @@ int main(int argc, char const *argv[])
             2. Paper
             3. Scissors
         */
-            buffer = NULL;
         //cada cliente envia sua resposta
       while(1){
         do{
             scanf("%s",resposta);
             printf("Awating Response...\n");
-            send(server_fd, resposta, strlen(resposta) , 0 );
+            send_message(server_fd, resposta );
             read_message(server_fd);
         }while(!strcmp(buffer, "Invalid Answer"));
         read_message(server_fd);
         //cliente recebe a mensagem se ganhou, perdeu ou deu empate
         read_message(server_fd);
         read_message(server_fd);
-        buffer = NULL;
 
         do{
         //pergunta-se se o cliente que jogar de novo
             scanf("%s",resposta);
             printf("Awating Response...\n");
-            send(server_fd, resposta, strlen(resposta) , 0 );
+            send_message(server_fd, resposta );
             read_message(server_fd);
-           // if(resposta[0] = 'N') break;
          }while(!strcmp(buffer,"Invalid Answer"));
 
          if(!strcmp(buffer, "Game Over")){
@@ -123,7 +126,7 @@ int main(int argc, char const *argv[])
       }
 
         if(buffer) free(buffer);
-        shutdown(server_fd,2);
+        closeSocket(server_fd);
 
     return 0;
 }

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
-#include "socketManager.h"
+#include "../socketManager.h"
 #define WINNER_PLAYER1 -1
 #define WINNER_PLAYER2 -2
 #define DRAW -3
@@ -77,7 +77,6 @@ int find_winner(char *choice1, char* choice2){
 void startingConnection(int* player1,int *player2 ){
   int server_fd;
   struct sockaddr_in address;
- // int addrlen = sizeof(address);
 
      server_fd = createSocketFD();
 
@@ -99,9 +98,9 @@ void startingConnection(int* player1,int *player2 ){
 }
 
 void send_message(int player, char *s){
-    int aux = strlen(s);
-    send(player, &aux, sizeof(int), 0 );
-    send(player , s , strlen(s) , 0 );
+    int messageLenght = strlen(s)+1;
+    send(player, &messageLenght, sizeof(int), 0 );
+    send(player , s , messageLenght , 0 );
 }
 
 void send_message_all(int player1, int player2 ,char *s){
@@ -110,12 +109,16 @@ void send_message_all(int player1, int player2 ,char *s){
 }
 
 void read_message(int fd, char **buffer){
-    (*buffer) = (char*)malloc(sizeof(char)*50);
+    if(*buffer != NULL){
+      free(*buffer);
+      *buffer = NULL;
+    }
+    int messageLenght;
+    read(fd, &messageLenght, sizeof(int));
+    (*buffer) = (char*)malloc(sizeof(char)*messageLenght);
     //Recebebendo mensagem do servidor
-//    printf("--open\n");
-    read( fd , (*buffer), 256);
-//    printf("--close\n");
-    printf("%s\n",(*buffer) );
+    read( fd , (*buffer), messageLenght);
+    printf("Received Message: %s\n",(*buffer) );
 
 }
 
@@ -150,11 +153,7 @@ int main(int argc, char const *argv[])
     Obs: nao funciona se o servidor nao receber alguma mensagem de confirmacao
     */
     read_message(player1,&buffer);
-    free(buffer);
-    buffer = NULL;
     read_message(player2,&buffer);
-    free(buffer);
-    buffer = NULL;
 
     /*
     Server envia mensagem "Xº Player Connected\n" sendo X o valor 1 ou 2 dependendo da ordem de conexao
@@ -202,8 +201,6 @@ int main(int argc, char const *argv[])
             }else{
               printf("Invalid Answer");
               send_message(player1, invalid);
-              free(buffer);
-              buffer = NULL;
             }
       }
       send_message_all(player1,player2,weapons);
@@ -256,6 +253,8 @@ while(TRUE){
         if(choice1[0]=='N' || choice2[0]=='N') break;
 
      }   */
+     free(choice1);
+     free(choice2);
      choice1 = choice2 = NULL;
      while(choice1 == NULL || choice2 == NULL){
        if(choice1 == NULL)read_message(player1,&choice1);
@@ -276,6 +275,8 @@ while(TRUE){
        break;
      }else{
        send_message_all(player1,player2,weapons);
+       free(choice1);
+       free(choice2);
      }
 }
 
@@ -284,8 +285,8 @@ while(TRUE){
         if(choice1) free(choice1);
         if(choice2) free(choice2);
 
-    shutdown(player1,2);
-    shutdown(player2,2);
+    closeSocket(player1);
+    closeSocket(player2);
 
     return 0;
 }

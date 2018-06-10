@@ -3,7 +3,7 @@ all: clean socketManager.o client.o  compile
 compile:	
 	gcc socketManager.o client.o -o client.exe -lm 
 socketManager.o:
-	gcc -c socketManager.c 
+	gcc -c ../socketManager.c 
 client.o:
 	gcc -c client.c	
 clean:
